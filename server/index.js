@@ -16,13 +16,27 @@ const PORT = process.env.PORT || 5000
 
 io.on('connection', (socket) => {
   socket.on('join', ({name, room}, callBack) => {
-    const {user, error} = addUser({id: socket.id, name, room})
+    const {newUser, error} = addUser({id: socket.id, name, room})
 
     if(error) {
       return callBack(error)
     }
 
-    socket.join(user.room)
+    // Initial messaging for the new user and the broadcast message for other members of room
+    socket.emit('message', {user: 'admin', text: `${newUser.name} welcome to the room ${newUser.room}`})
+    socket.broadcast.to(newUser.room).emit('message', {user: 'admin', text: `${newUser.name} joined the room`})
+
+    socket.join(newUser.room)
+
+    callBack()
+  })
+
+  socket.on('sendMessage', (message, callBack) => {
+    const user = getUser(socket.id)
+
+    io.to(user.room).emit('message', {user: user.name, text: message});
+
+    callBack();
   })
 
   socket.on('disconnect', () => {
