@@ -15,6 +15,10 @@ const PORT = process.env.PORT || 5000
 io.on('connection', (socket) => {
   console.log('We have a new connection!')
 
+  socket.on('join', ({name, room}, callBack) => {
+    console.log(name, room)
+  })
+
   socket.on('disconnect', () => {
     console.log('User left!')
   })

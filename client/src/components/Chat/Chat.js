@@ -6,6 +6,7 @@ import './Chat.css';
 
 let socket;
 
+// location comes from react-router
 const Chat = ({ location }) => {
   const [name, setName] = useState('');
   const [room, setRoom] = useState('');
@@ -19,9 +20,15 @@ const Chat = ({ location }) => {
     setName(name);
     setRoom(room);
     
-    console.log(name)
-    console.log(room)
-    console.log(socket)
+    socket.emit('join', {name, room}, () => {
+      console.log('Callback called')
+    })
+
+    return () => {
+      socket.emit('disconnect')
+
+      socket.off()
+    }
   }, [ENDPOINT, location.search]);
 
   return (
