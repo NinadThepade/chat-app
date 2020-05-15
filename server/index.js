@@ -28,6 +28,7 @@ io.on('connection', (socket) => {
 
     socket.join(newUser.room)
 
+    io.to(newUser.room).emit('roomData', {room: newUser.room, users: getUsersInRoom(newUser.room)})
     callBack()
   })
 
@@ -35,12 +36,17 @@ io.on('connection', (socket) => {
     const user = getUser(socket.id)
 
     io.to(user.room).emit('message', {user: user.name, text: message});
+    io.to(user.room).emit('roomData', {room: user.room, users: getUsersInRoom(user.room)});
 
     callBack();
   })
 
   socket.on('disconnect', () => {
-    console.log('User left!')
+    const user = removeUser(socket.id)
+
+    if(user) {
+      io.to(user.room).emit('message', {user: 'admin', text: `${user.name} left`});
+    }
   })
 })
 
